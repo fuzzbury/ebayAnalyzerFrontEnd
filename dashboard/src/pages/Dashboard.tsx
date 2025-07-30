@@ -1,4 +1,16 @@
 import { useState, useEffect } from 'react';
+import { 
+  Container,
+  Typography,
+  Grid,
+  Card,
+  CardContent,
+  Alert,
+  CircularProgress,
+  Box,
+  Button,
+  Chip
+} from '@mui/material';
 import { fetchStats, fetchInventory, fetchLegoSets } from '../api';
 
 const Dashboard = () => {
@@ -42,107 +54,155 @@ const Dashboard = () => {
     loadData();
   }, []);
 
-  if (loading) return <div style={{ padding: '20px' }}>Loading dashboard...</div>;
+  if (loading) {
+    return (
+      <Container>
+        <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
+          <Box textAlign="center">
+            <CircularProgress size={60} />
+            <Typography variant="h6" sx={{ mt: 2 }}>
+              Loading dashboard...
+            </Typography>
+          </Box>
+        </Box>
+      </Container>
+    );
+  }
 
   return (
-    <div style={{ padding: '20px' }}>
-      <h1>eBay LEGO Analyzer Dashboard</h1>
+    <Container maxWidth="xl">
+      <Typography variant="h3" component="h1" gutterBottom sx={{ mb: 4 }}>
+        eBay LEGO Analyzer Dashboard
+      </Typography>
       
       {error && (
-        <div style={{ 
-          padding: '15px', 
-          backgroundColor: '#f8d7da', 
-          color: '#721c24', 
-          borderRadius: '5px', 
-          marginBottom: '20px' 
-        }}>
+        <Alert severity="error" sx={{ mb: 3 }}>
           <strong>Connection Error:</strong> {error}
           <br />
-          <small>Make sure your FastAPI server is running at http://127.0.0.1:8000/</small>
-        </div>
+          <Typography variant="caption">
+            Make sure your FastAPI server is running at http://127.0.0.1:8000/
+          </Typography>
+        </Alert>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
+      <Grid container spacing={3}>
         {/* Statistics Card */}
-        <div style={{ padding: '20px', backgroundColor: '#f8f9fa', borderRadius: '8px', border: '1px solid #ddd' }}>
-          <h2>Statistics</h2>
-          {stats ? (
-            <pre style={{ fontSize: '12px', overflow: 'auto' }}>{JSON.stringify(stats, null, 2)}</pre>
-          ) : (
-            <p>No statistics available</p>
-          )}
-        </div>
+        <Grid item xs={12} md={4}>
+          <Card sx={{ height: '100%' }}>
+            <CardContent>
+              <Typography variant="h5" component="h2" gutterBottom>
+                Statistics
+              </Typography>
+              {stats ? (
+                <Box sx={{ maxHeight: 300, overflow: 'auto' }}>
+                  <pre style={{ fontSize: '12px', whiteSpace: 'pre-wrap' }}>
+                    {JSON.stringify(stats, null, 2)}
+                  </pre>
+                </Box>
+              ) : (
+                <Typography variant="body2" color="text.secondary">
+                  No statistics available
+                </Typography>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
 
         {/* Recent Inventory Card */}
-        <div style={{ padding: '20px', backgroundColor: '#f8f9fa', borderRadius: '8px', border: '1px solid #ddd' }}>
-          <h2>Recent Inventory ({inventory.length} items)</h2>
-          {inventory.length > 0 ? (
-            <div style={{ maxHeight: '200px', overflow: 'auto' }}>
-              {inventory.slice(0, 3).map((item, index) => (
-                <div key={index} style={{ marginBottom: '10px', padding: '10px', backgroundColor: 'white', borderRadius: '4px' }}>
-                  <pre style={{ fontSize: '11px', margin: 0 }}>
-                    {JSON.stringify(item, null, 2).substring(0, 200)}...
-                  </pre>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p>No inventory items available</p>
-          )}
-        </div>
+        <Grid item xs={12} md={4}>
+          <Card sx={{ height: '100%' }}>
+            <CardContent>
+              <Box display="flex" alignItems="center" gap={1} mb={2}>
+                <Typography variant="h5" component="h2">
+                  Recent Inventory
+                </Typography>
+                <Chip label={`${inventory.length} items`} size="small" color="primary" />
+              </Box>
+              
+              {inventory.length > 0 ? (
+                <Box sx={{ maxHeight: 300, overflow: 'auto' }}>
+                  {inventory.slice(0, 3).map((item, index) => (
+                    <Card key={index} variant="outlined" sx={{ mb: 1, p: 1 }}>
+                      <pre style={{ fontSize: '11px', margin: 0, whiteSpace: 'pre-wrap' }}>
+                        {JSON.stringify(item, null, 2).substring(0, 200)}...
+                      </pre>
+                    </Card>
+                  ))}
+                </Box>
+              ) : (
+                <Typography variant="body2" color="text.secondary">
+                  No inventory items available
+                </Typography>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
 
         {/* Recent LEGO Sets Card */}
-        <div style={{ padding: '20px', backgroundColor: '#f8f9fa', borderRadius: '8px', border: '1px solid #ddd' }}>
-          <h2>Recent LEGO Sets ({legoSets.length} sets)</h2>
-          {legoSets.length > 0 ? (
-            <div style={{ maxHeight: '200px', overflow: 'auto' }}>
-              {legoSets.slice(0, 3).map((set, index) => (
-                <div key={index} style={{ marginBottom: '10px', padding: '10px', backgroundColor: 'white', borderRadius: '4px' }}>
-                  <pre style={{ fontSize: '11px', margin: 0 }}>
-                    {JSON.stringify(set, null, 2).substring(0, 200)}...
-                  </pre>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p>No LEGO sets available</p>
-          )}
-        </div>
-      </div>
+        <Grid item xs={12} md={4}>
+          <Card sx={{ height: '100%' }}>
+            <CardContent>
+              <Box display="flex" alignItems="center" gap={1} mb={2}>
+                <Typography variant="h5" component="h2">
+                  Recent LEGO Sets
+                </Typography>
+                <Chip label={`${legoSets.length} sets`} size="small" color="secondary" />
+              </Box>
+              
+              {legoSets.length > 0 ? (
+                <Box sx={{ maxHeight: 300, overflow: 'auto' }}>
+                  {legoSets.slice(0, 3).map((set, index) => (
+                    <Card key={index} variant="outlined" sx={{ mb: 1, p: 1 }}>
+                      <pre style={{ fontSize: '11px', margin: 0, whiteSpace: 'pre-wrap' }}>
+                        {JSON.stringify(set, null, 2).substring(0, 200)}...
+                      </pre>
+                    </Card>
+                  ))}
+                </Box>
+              ) : (
+                <Typography variant="body2" color="text.secondary">
+                  No LEGO sets available
+                </Typography>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
 
-      <div style={{ marginTop: '20px' }}>
-        <h2>Quick Actions</h2>
-        <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-          <a href="/inventory" style={{ 
-            padding: '10px 20px', 
-            backgroundColor: '#3498db', 
-            color: 'white', 
-            textDecoration: 'none', 
-            borderRadius: '5px' 
-          }}>
-            View All Inventory
-          </a>
-          <a href="/lego-sets" style={{ 
-            padding: '10px 20px', 
-            backgroundColor: '#3498db', 
-            color: 'white', 
-            textDecoration: 'none', 
-            borderRadius: '5px' 
-          }}>
-            Browse LEGO Sets
-          </a>
-          <a href="/stats" style={{ 
-            padding: '10px 20px', 
-            backgroundColor: '#3498db', 
-            color: 'white', 
-            textDecoration: 'none', 
-            borderRadius: '5px' 
-          }}>
-            Detailed Statistics
-          </a>
-        </div>
-      </div>
-    </div>
+        {/* Quick Actions */}
+        <Grid item xs={12}>
+          <Card>
+            <CardContent>
+              <Typography variant="h5" component="h2" gutterBottom>
+                Quick Actions
+              </Typography>
+              <Box display="flex" gap={2} flexWrap="wrap">
+                <Button 
+                  variant="contained" 
+                  href="/inventory"
+                  sx={{ minWidth: 160 }}
+                >
+                  View All Inventory
+                </Button>
+                <Button 
+                  variant="contained" 
+                  href="/lego-sets"
+                  sx={{ minWidth: 160 }}
+                >
+                  Browse LEGO Sets
+                </Button>
+                <Button 
+                  variant="contained" 
+                  href="/stats"
+                  sx={{ minWidth: 160 }}
+                >
+                  Detailed Statistics
+                </Button>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+    </Container>
   );
 };
 

@@ -1,88 +1,174 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { 
+  ThemeProvider, 
+  createTheme, 
+  CssBaseline,
+  Drawer,
+  AppBar,
+  Toolbar,
+  Typography,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  Box,
+  Container
+} from '@mui/material';
 import Dashboard from './pages/Dashboard';
-import './App.css'
 
-// Simple Layout component with working sidebar
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#1976d2',
+    },
+    secondary: {
+      main: '#dc004e',
+    },
+  },
+});
+
+const drawerWidth = 240;
+
+// MUI Layout component
 function Layout() {
+  const location = useLocation();
+  
+  const menuItems = [
+    { text: 'Dashboard', path: '/' },
+    { text: 'Inventory', path: '/inventory' },
+    { text: 'LEGO Sets', path: '/lego-sets' },
+    { text: 'Statistics', path: '/stats' },
+  ];
+
   return (
-    <div className="app-layout">
-      <nav className="sidebar">
-        <div className="sidebar-header">
-          <h2>eBay LEGO Analyzer</h2>
-        </div>
-        <ul className="sidebar-nav">
-          <li>
-            <NavLink to="/" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-              Dashboard
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/inventory" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-              Inventory
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/lego-sets" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-              LEGO Sets
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/stats" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-              Statistics
-            </NavLink>
-          </li>
-        </ul>
-      </nav>
-      <main className="main-content">
+    <Box sx={{ display: 'flex' }}>
+      <AppBar
+        position="fixed"
+        sx={{ width: `calc(100% - ${drawerWidth}px)`, ml: `${drawerWidth}px` }}
+      >
+        <Toolbar>
+          <Typography variant="h6" noWrap component="div">
+            eBay LEGO Analyzer
+          </Typography>
+        </Toolbar>
+      </AppBar>
+      
+      <Drawer
+        sx={{
+          width: drawerWidth,
+          flexShrink: 0,
+          '& .MuiDrawer-paper': {
+            width: drawerWidth,
+            boxSizing: 'border-box',
+          },
+        }}
+        variant="permanent"
+        anchor="left"
+      >
+        <Toolbar>
+          <Typography variant="h6" component="div">
+            Navigation
+          </Typography>
+        </Toolbar>
+        
+        <List>
+          {menuItems.map((item) => (
+            <ListItem key={item.text} disablePadding>
+              <ListItemButton
+                component={NavLink}
+                to={item.path}
+                selected={location.pathname === item.path}
+                sx={{
+                  '&.Mui-selected': {
+                    backgroundColor: 'primary.main',
+                    color: 'primary.contrastText',
+                    '&:hover': {
+                      backgroundColor: 'primary.dark',
+                    },
+                  },
+                }}
+              >
+                <ListItemText primary={item.text} />
+              </ListItemButton>
+            </ListItem>
+          ))}
+        </List>
+      </Drawer>
+      
+      <Box
+        component="main"
+        sx={{ 
+          flexGrow: 1, 
+          bgcolor: 'background.default', 
+          p: 3,
+          marginTop: '64px', // Height of AppBar
+          minHeight: 'calc(100vh - 64px)'
+        }}
+      >
         <Outlet />
-      </main>
-    </div>
+      </Box>
+    </Box>
   );
 }
 
-// Simple placeholder components
+// MUI placeholder components
 function Inventory() {
   return (
-    <div style={{ padding: '20px' }}>
-      <h1>Inventory</h1>
-      <p>Inventory page - API integration coming soon</p>
-    </div>
+    <Container>
+      <Typography variant="h4" component="h1" gutterBottom>
+        Inventory
+      </Typography>
+      <Typography variant="body1">
+        Inventory page - API integration coming soon
+      </Typography>
+    </Container>
   );
 }
 
 function LegoSets() {
   return (
-    <div style={{ padding: '20px' }}>
-      <h1>LEGO Sets</h1>
-      <p>LEGO Sets page - API integration coming soon</p>
-    </div>
+    <Container>
+      <Typography variant="h4" component="h1" gutterBottom>
+        LEGO Sets
+      </Typography>
+      <Typography variant="body1">
+        LEGO Sets page - API integration coming soon
+      </Typography>
+    </Container>
   );
 }
 
 function Stats() {
   return (
-    <div style={{ padding: '20px' }}>
-      <h1>Statistics</h1>
-      <p>Statistics page - API integration coming soon</p>
-    </div>
+    <Container>
+      <Typography variant="h4" component="h1" gutterBottom>
+        Statistics
+      </Typography>
+      <Typography variant="body1">
+        Statistics page - API integration coming soon
+      </Typography>
+    </Container>
   );
 }
 
 function App() {
-  console.log('App component rendering with router');
+  console.log('App component rendering with MUI');
   
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Dashboard />} />
-          <Route path="inventory" element={<Inventory />} />
-          <Route path="lego-sets" element={<LegoSets />} />
-          <Route path="stats" element={<Stats />} />
-        </Route>
-      </Routes>
-    </Router>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Router>
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Dashboard />} />
+            <Route path="inventory" element={<Inventory />} />
+            <Route path="lego-sets" element={<LegoSets />} />
+            <Route path="stats" element={<Stats />} />
+          </Route>
+        </Routes>
+      </Router>
+    </ThemeProvider>
   );
 }
 
