@@ -12,10 +12,12 @@ import {
   ListItem,
   ListItemButton,
   ListItemText,
-  Box,
-  Container
+  Box
 } from '@mui/material';
 import Dashboard from './pages/Dashboard';
+import Inventory from './pages/Inventory';
+import LegoSets from './pages/LegoSets';
+import Stats from './pages/Stats';
 
 const theme = createTheme({
   palette: {
@@ -112,45 +114,6 @@ function Layout() {
   );
 }
 
-// MUI placeholder components
-function Inventory() {
-  return (
-    <Container>
-      <Typography variant="h4" component="h1" gutterBottom>
-        Inventory
-      </Typography>
-      <Typography variant="body1">
-        Inventory page - API integration coming soon
-      </Typography>
-    </Container>
-  );
-}
-
-function LegoSets() {
-  return (
-    <Container>
-      <Typography variant="h4" component="h1" gutterBottom>
-        LEGO Sets
-      </Typography>
-      <Typography variant="body1">
-        LEGO Sets page - API integration coming soon
-      </Typography>
-    </Container>
-  );
-}
-
-function Stats() {
-  return (
-    <Container>
-      <Typography variant="h4" component="h1" gutterBottom>
-        Statistics
-      </Typography>
-      <Typography variant="body1">
-        Statistics page - API integration coming soon
-      </Typography>
-    </Container>
-  );
-}
 
 function App() {
   console.log('App component rendering with MUI');

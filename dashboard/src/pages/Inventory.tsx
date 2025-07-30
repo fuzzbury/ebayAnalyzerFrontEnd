@@ -1,81 +1,155 @@
-import { useEffect, useState } from 'react';
-import { apiService } from '../services/api';
-import { InventoryItem } from '../types/api';
+import { useState, useEffect } from 'react';
+import { 
+  Container,
+  Typography,
+  Grid,
+  Card,
+  CardContent,
+  Alert,
+  CircularProgress,
+  Box,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  TextField,
+  Chip
+} from '@mui/material';
+import { fetchInventory } from '../api';
 
 const Inventory = () => {
-  const [inventory, setInventory] = useState<InventoryItem[]>([]);
+  const [inventory, setInventory] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null);
   const [filters, setFilters] = useState({
-    skip: 0,
     limit: 100,
-    is_lego: null as boolean | null
+    is_lego: ''
   });
 
   useEffect(() => {
-    const fetchInventory = async () => {
+    const loadInventory = async () => {
       try {
         setLoading(true);
-        const data = await apiService.getInventory(filters);
+        setError(null);
+        const data = await fetchInventory(filters.limit);
         setInventory(data);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch inventory');
+        setError('Failed to fetch inventory data');
+        console.error('Inventory error:', err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchInventory();
+    loadInventory();
   }, [filters]);
 
-  const handleFilterChange = (key: keyof typeof filters, value: any) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
+  const handleFilterChange = (field: string, value: any) => {
+    setFilters(prev => ({ ...prev, [field]: value }));
   };
 
-  if (loading) return <div className="loading">Loading inventory...</div>;
-  if (error) return <div className="error">Error: {error}</div>;
+  if (loading) {
+    return (
+      <Container>
+        <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
+          <Box textAlign="center">
+            <CircularProgress size={60} />
+            <Typography variant="h6" sx={{ mt: 2 }}>
+              Loading inventory...
+            </Typography>
+          </Box>
+        </Box>
+      </Container>
+    );
+  }
 
   return (
-    <div className="page">
-      <h1>Inventory</h1>
-      
-      <div className="filters">
-        <label>
-          LEGO Filter:
-          <select 
-            value={filters.is_lego === null ? '' : String(filters.is_lego)}
-            onChange={(e) => handleFilterChange('is_lego', e.target.value === '' ? null : e.target.value === 'true')}
-          >
-            <option value="">All Items</option>
-            <option value="true">LEGO Only</option>
-            <option value="false">Non-LEGO Only</option>
-          </select>
-        </label>
-        
-        <label>
-          Limit:
-          <input 
-            type="number" 
-            value={filters.limit}
-            onChange={(e) => handleFilterChange('limit', parseInt(e.target.value))}
-            min="1"
-            max="1000"
-          />
-        </label>
-      </div>
+    <Container maxWidth="xl">
+      <Box display="flex" alignItems="center" gap={2} mb={4}>
+        <Typography variant="h3" component="h1">
+          Inventory
+        </Typography>
+        <Chip label={`${inventory.length} items`} color="primary" />
+      </Box>
 
-      <div className="inventory-grid">
-        {inventory.map((item, index) => (
-          <div key={index} className="inventory-card">
-            <pre>{JSON.stringify(item, null, 2)}</pre>
-          </div>
-        ))}
-      </div>
-      
-      {inventory.length === 0 && !loading && (
-        <div className="no-data">No inventory items found.</div>
+      {error && (
+        <Alert severity="error" sx={{ mb: 3 }}>
+          <strong>Error:</strong> {error}
+          <br />
+          <Typography variant="caption">
+            Make sure your FastAPI server is running at http://127.0.0.1:8000/
+          </Typography>
+        </Alert>
       )}
-    </div>
+
+      <Card sx={{ mb: 3 }}>
+        <CardContent>
+          <Typography variant="h6" gutterBottom>
+            Filters
+          </Typography>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6} md={3}>
+              <FormControl fullWidth>
+                <InputLabel>LEGO Filter</InputLabel>
+                <Select
+                  value={filters.is_lego}
+                  label="LEGO Filter"
+                  onChange={(e) => handleFilterChange('is_lego', e.target.value)}
+                >
+                  <MenuItem value="">All Items</MenuItem>
+                  <MenuItem value="true">LEGO Only</MenuItem>
+                  <MenuItem value="false">Non-LEGO Only</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <TextField
+                fullWidth
+                label="Limit"
+                type="number"
+                value={filters.limit}
+                onChange={(e) => handleFilterChange('limit', parseInt(e.target.value) || 100)}
+                inputProps={{ min: 1, max: 1000 }}
+              />
+            </Grid>
+          </Grid>
+        </CardContent>
+      </Card>
+
+      <Grid container spacing={3}>
+        {inventory.length > 0 ? (
+          inventory.map((item, index) => (
+            <Grid item xs={12} sm={6} md={4} key={index}>
+              <Card sx={{ height: '100%' }}>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom>
+                    Item #{index + 1}
+                  </Typography>
+                  <Box sx={{ maxHeight: 300, overflow: 'auto' }}>
+                    <pre style={{ fontSize: '11px', whiteSpace: 'pre-wrap', margin: 0 }}>
+                      {JSON.stringify(item, null, 2)}
+                    </pre>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))
+        ) : (
+          <Grid item xs={12}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" color="text.secondary" textAlign="center">
+                  No inventory items found
+                </Typography>
+                <Typography variant="body2" color="text.secondary" textAlign="center" sx={{ mt: 1 }}>
+                  {error ? 'Check your server connection' : 'Try adjusting your filters'}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        )}
+      </Grid>
+    </Container>
   );
 };
 
